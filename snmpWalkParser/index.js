@@ -11,7 +11,7 @@ SnmpWalkFileProcessor.prototype = new events.EventEmitter();
 
 SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
 
-    var self = this;
+    var self = this
 
     fs.readFile(filename, "utf8", function (err, fileAsString) {
 
@@ -45,9 +45,7 @@ SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql)
 
 
 
-
-
-exports.load = exports.open = exports.SnmpWalkFileProcessor = exports.init = function () {
+exports.init = function () {
 
     return new SnmpWalkFileProcessor();
 
