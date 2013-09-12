@@ -2,9 +2,11 @@
 var nosql = require('nosql').load("./tmpDB.nosql");
 nosql.clear();
 
-var snmpWalkParser = require('./snmpWalkParser');
+var snmpWalkParser = require('./snmpWalkParser').init();
 
-snmpWalkParser.processSnmpWalkFile("./example.snmpwalk", nosql,  function () {
+snmpWalkParser.processSnmpWalkFile("./example.snmpwalk", nosql);
+
+snmpWalkParser.on("fileprocessed", function () {
 
     nosql.all("doc.oid == '.1.3.6.1.4.1.5528.100.4.1.10.1.5.1382714834'", function (doc, offset) {
 

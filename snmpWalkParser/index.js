@@ -1,8 +1,17 @@
 
 var fs = require('fs');
+var events = require('events');
 
 
-processSnmpWalkFile = function (filename, nosql, callback) {
+function SnmpWalkFileProcessor() {
+    
+}
+
+SnmpWalkFileProcessor.prototype = new events.EventEmitter();
+
+SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
+
+    var self = this;
 
     fs.readFile(filename, "utf8", function (err, fileAsString) {
 
@@ -26,17 +35,20 @@ processSnmpWalkFile = function (filename, nosql, callback) {
 
         nosql.on('insert', function () {
             if (nosql.pendingWrite.length == 0) {
-                callback();
+                self.emit('fileprocessed');
             }
         });
 
-
     });
-
 
 };
 
 
 
 
-exports.processSnmpWalkFile = processSnmpWalkFile;
+
+exports.load = exports.open = exports.SnmpWalkFileProcessor = exports.init = function () {
+
+    return new SnmpWalkFileProcessor();
+
+};
