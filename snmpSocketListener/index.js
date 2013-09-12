@@ -16,6 +16,29 @@ function convertOIDToString(oid) {
     return output;
 }
 
+function convertWalkTypeToAsn1BerType(walkType){
+
+    Type = {
+        "INTEGER": "Integer",
+        "STRING": "OctetString",
+        "Hex-STRING": "OctetString",
+        "": "Null",
+        "OID": "ObjectIdentifier",
+        "Sequence": "Sequence",
+        "IPADDRESS": "IpAddress",
+        "Counter32": "Counter",
+        "Gauge32": "Gauge",
+        "Timeticks": "TimeTicks"
+    };
+
+    if (Type[walkType] != null) {
+        return Type[walkType];
+    }
+    else {
+        return walkType;
+    }
+}
+
 
 function SnmpSocketListener(port, nosql) {
 
@@ -41,7 +64,7 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
         var response = new snmp.Packet();
         response.pdu.type = asn1ber.pduTypes.GetResponsePDU;
         response.pdu.reqid = request.pdu.reqid;
-        response.pdu.varbinds[0].type = asn1ber.types.OctetString;
+        response.pdu.varbinds[0].type = asn1ber.types[convertWalkTypeToAsn1BerType(doc[0].dataType)];
         response.pdu.varbinds[0].oid = request.pdu.varbinds[0].oid;
         response.pdu.varbinds[0].value = doc[0].dataValue;
 
