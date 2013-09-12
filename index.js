@@ -1,16 +1,10 @@
 var SNMP_PORT = 161;
 
-
 var nosql = require('nosql').load("./tmpDB.nosql");
-var snmpWalkParser = require('./snmpWalkParser').init();
-
-
-
 nosql.clear();
 
-
+var snmpWalkParser = require('./snmpWalkParser').init();
 snmpWalkParser.processSnmpWalkFile("./example.snmpwalk", nosql);
-
 
 snmpWalkParser.on("fileprocessed", function () {
 
