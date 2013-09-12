@@ -2,7 +2,7 @@
 
 var events = require('events');
 var dgram = require('dgram');
-
+var snmpPacketParser = require('../snmpPacketParser');
 
 
 function SnmpSocketListener(port) {
@@ -19,6 +19,7 @@ SnmpSocketListener.prototype = new events.EventEmitter();
 SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
     console.log(msg);
+    console.log(snmpPacketParser.GetOidFromPacket(msg));
 
 }
 
