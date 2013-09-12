@@ -19,7 +19,10 @@ SnmpSocketListener.prototype = new events.EventEmitter();
 SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
     console.log(msg);
-    console.log(snmpPacketParser.GetOidFromPacket(msg));
+    parsedPacket = snmpPacketParser.parsePacket(msg);
+
+    console.log(parsedPacket["OBJECT_IDENTIFIER_VALUE"]);
+
 
 }
 

@@ -47,7 +47,7 @@ function isInt(n) {
 }
 
 
-GetOidFromPacket = function (msg) {
+parsePacket = function (msg) {
 
     var formattedPacket = {};
 
@@ -55,28 +55,21 @@ GetOidFromPacket = function (msg) {
 
     for (key in SNMP_STRUCTURE_SIZE_IN_BYTES) {
 
-        console.log(currentPosition, key, SNMP_STRUCTURE_SIZE_IN_BYTES[key], isInt(SNMP_STRUCTURE_SIZE_IN_BYTES[key]), formattedPacket);
-        console.log("===============================");
-
         if (isInt(SNMP_STRUCTURE_SIZE_IN_BYTES[key])) {
             nextSliceSize = SNMP_STRUCTURE_SIZE_IN_BYTES[key];
         }
         else {
-            nextSliceSize = formattedPacket[SNMP_STRUCTURE_SIZE_IN_BYTES[key]];
+            nextSliceSize = formattedPacket[SNMP_STRUCTURE_SIZE_IN_BYTES[key]].readUInt8(0);
         }
 
-        if (key.indexOf("_LENGTH") > -1) {
-            formattedPacket[key] = msg.readUInt8(currentPosition);
-        } else {
-            formattedPacket[key] = msg.slice(currentPosition, currentPosition + nextSliceSize);
-        }
+        formattedPacket[key] = msg.slice(currentPosition, currentPosition + nextSliceSize);
 
         currentPosition += nextSliceSize;
     }
 
-    console.log(formattedPacket);
+    return formattedPacket;
 
 }
 
 
-exports.GetOidFromPacket = GetOidFromPacket;
+exports.parsePacket = parsePacket;
