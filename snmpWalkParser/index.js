@@ -3,19 +3,22 @@ var fs = require('fs');
 
 
 function SnmpWalkParser(nosql) {
-    this.nosql = nosql;
+    Nosql = nosql;
 };
 
 
 SnmpWalkParser.prototype.processSnmpWalkFile = function(filename) {
 
     fs.readFile(filename, "utf8", function(err, snmpWalkString) {
-            if (err) throw err;
 
-            snmpWalkString.split("\n").map(function(value, key) {
+        if (err) throw err;
 
-                this.nosql.insert({ 'value': value, 'key': key });
-            });
+        snmpWalkString.split("\n").map(function(value, key) {
+
+            Nosql.insert({ 'value': value, 'key': key });
+
+        });
+
     });
 
 };
