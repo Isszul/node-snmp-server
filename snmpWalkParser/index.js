@@ -2,9 +2,7 @@
 var fs = require('fs');
 
 
-processSnmpWalkFile = function (filename, nosql) {
-
-    Nosql = nosql;
+processSnmpWalkFile = function (filename, nosql, callback) {
 
     fs.readFile(filename, "utf8", function (err, fileAsString) {
 
@@ -22,11 +20,19 @@ processSnmpWalkFile = function (filename, nosql) {
             dataValueString = value[1];
 
 
-            Nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
+            nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
 
         });
 
+        nosql.on('insert', function () {
+            if (nosql.pendingWrite.length == 0) {
+                callback();
+            }
+        });
+
+
     });
+
 
 };
 

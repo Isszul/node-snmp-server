@@ -4,12 +4,12 @@ nosql.clear();
 
 var snmpWalkParser = require('./snmpWalkParser');
 
-snmpWalkParser.processSnmpWalkFile("./example.snmpwalk", nosql);
+snmpWalkParser.processSnmpWalkFile("./example.snmpwalk", nosql,  function () {
 
-nosql.update();
+    nosql.all("doc.oid == '.1.3.6.1.4.1.5528.100.4.1.10.1.5.1382714834'", function (doc, offset) {
 
-nosql.all("", function (doc, offset) {
+        console.log(doc);
 
-    console.log(doc);
-
+    });
 });
+
