@@ -2,12 +2,9 @@
 var fs = require('fs');
 
 
-function SnmpWalkParser(nosql) {
+processSnmpWalkFile = function (filename, nosql) {
+
     Nosql = nosql;
-};
-
-
-SnmpWalkParser.prototype.processSnmpWalkFile = function (filename) {
 
     fs.readFile(filename, "utf8", function (err, fileAsString) {
 
@@ -17,15 +14,15 @@ SnmpWalkParser.prototype.processSnmpWalkFile = function (filename) {
 
             line = line.split(" = ");
 
-            key = line[0];
+            oidString = line[0];
 
             value = line[1].split(": ");
-            dataType = value[0];
-            dataValue = value[1];
+
+            dataTypeString = value[0];
+            dataValueString = value[1];
 
 
-            Nosql.insert({ 'key': key, 'dataType': dataType, 'dataValue': dataValue });
-
+            Nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
 
         });
 
@@ -36,6 +33,4 @@ SnmpWalkParser.prototype.processSnmpWalkFile = function (filename) {
 
 
 
-exports.load = exports.open = exports.SnmpWalkParser = exports.init = function(nosql) {
-	return new SnmpWalkParser(nosql);
-};
+exports.processSnmpWalkFile = processSnmpWalkFile;
