@@ -49,6 +49,43 @@ var snmpWalkToAsn1BerType = {
 };
 
 
+function buildPacket(request, type, oid, value) {
+    
+    var response = new snmp.Packet();
+    response.pdu.type = asn1ber.pduTypes.GetResponsePDU;
+    response.pdu.reqid = request.pdu.reqid;
+    response.pdu.varbinds[0].type = type; 
+    response.pdu.varbinds[0].oid = oid;
+    response.pdu.varbinds[0].value = value;
+
+    return response;
+}
+
+
+function getTypeFromDoc(doc) {
+
+    var docDataType = doc.dataType;
+    var type = snmpWalkToAsn1BerType[docDataType];
+    if (docDataType == null || snmpWalkToAsn1BerType[docDataType] == null){
+        type = asn1ber.types.Null;
+    }
+    else {
+        type = asn1ber.types[snmpWalkToAsn1BerType[doc.dataType]] 
+    }
+    return type;         
+}
+
+
+function getValueFromDoc(doc) {
+    
+    var value = doc.dataValue;
+    if (doc.dataType == "OID") {
+        value =  convertStringToOID(doc.dataValue);
+    }
+    return value;
+}
+
+
 function SnmpSocketListener(port, nosql) {
 
     this.nosql = nosql;
@@ -57,6 +94,7 @@ function SnmpSocketListener(port, nosql) {
 
     this.socket.on('message', this.messageRecieved.bind(this));
 }
+
 
 SnmpSocketListener.prototype = new events.EventEmitter();
 
@@ -77,10 +115,6 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
     this.nosql.one(nosqlFilter, function (doc, offset) {
 
-        var response = new snmp.Packet();
-        response.pdu.type = asn1ber.pduTypes.GetResponsePDU;
-        response.pdu.reqid = request.pdu.reqid;
-
         console.log(new Date() + ":" + (getNext ? "GetNext" : "Get") + "Request id:" + request.pdu.reqid + ", OID: " + request.pdu.varbinds[0].oid + ", IpAddress :" + rinfo.address);
 
         var type;
@@ -88,22 +122,9 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
         var value;
 
         if (doc != null){
-            
-            var docDataType = doc.dataType;
-            type = snmpWalkToAsn1BerType[docDataType];
-            if (docDataType == null || snmpWalkToAsn1BerType[docDataType] == null){
-                type = asn1ber.types.Null;
-            }
-            else {
-                type = asn1ber.types[snmpWalkToAsn1BerType[doc.dataType]] 
-            }
-
+            type = getTypeFromDoc(doc);
             oid = convertStringToOID(doc.oid);
-
-            var value = doc.dataValue;
-            if (doc.dataType == "OID") {
-                value =  convertStringToOID(doc.dataValue);
-            }
+            value = getValueFromDoc(doc);
         }
         else {
             type = asn1ber.types.NoSuchObject;
@@ -111,9 +132,7 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
             value = "";
         }
 
-        response.pdu.varbinds[0].type = type; 
-        response.pdu.varbinds[0].oid = oid;
-        response.pdu.varbinds[0].value = value;
+        var response = buildPacket(request, type, oid, value);
 
         var responseMessage = snmp.encode(response);
 
@@ -124,7 +143,6 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
         });
     });
 }
-
 
 exports.init = function (port, nosql) {
     return new SnmpSocketListener(port, nosql);
