@@ -16,27 +16,26 @@ function convertOIDToString(oid) {
     return output;
 }
 
-function convertWalkTypeToAsn1BerType(walkType){
+// Convert a string formatted OID to an array, leaving anything non-string alone.
 
-    Type = {
-        "INTEGER": "Integer",
-        "STRING": "OctetString",
-        "Hex-STRING": "OctetString",
-        "": "Null",
-        "OID": "ObjectIdentifier",
-        "Sequence": "Sequence",
-        "IPADDRESS": "IpAddress",
-        "Counter32": "Counter",
-        "Gauge32": "Gauge",
-        "Timeticks": "TimeTicks"
-    };
+function convertStringToOID(oid) {
+    if (typeof oid !== 'string') {
+        return oid;
+    }
 
-    if (Type[walkType] != null) {
-        return Type[walkType];
+    if (oid[0] !== '.') {
+        throw new Error('Invalid OID format');
     }
-    else {
-        return walkType;
-    }
+
+    oid = oid.split('.')
+        .filter(function (s) {
+            return s.length > 0;
+        })
+        .map(function (s) {
+            return parseInt(s, 10);
+        });
+
+    return oid;
 }
 
 
@@ -58,19 +57,27 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
     var request = snmp.parse(msg);
     var oid = convertOIDToString(request.pdu.varbinds[0].oid);
 
-    this.nosql.all("doc.oid == '" + oid + "'", function (doc, offset) {
 
+    if (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU) {
+        nosqlFilter = "doc.oid > '" + oid + "'";
+    }
+    else {
+        nosqlFilter = "doc.oid == '" + oid + "'";
+    }
+
+
+    this.nosql.one(nosqlFilter, function (doc, offset) {
+
+        console.log(doc);
 
         var response = new snmp.Packet();
         response.pdu.type = asn1ber.pduTypes.GetResponsePDU;
         response.pdu.reqid = request.pdu.reqid;
-        response.pdu.varbinds[0].type = asn1ber.types[convertWalkTypeToAsn1BerType(doc[0].dataType)];
-        response.pdu.varbinds[0].oid = request.pdu.varbinds[0].oid;
-        response.pdu.varbinds[0].value = doc[0].dataValue;
+        response.pdu.varbinds[0].type = (doc.dataValue != null) ? asn1ber.types.OctetString: asn1ber.types.Null;
+        response.pdu.varbinds[0].oid = convertStringToOID(doc.oid);
+        response.pdu.varbinds[0].value = doc.dataValue;
 
         var responseMessage = snmp.encode(response);
-
-        console.log(responseMessage, 0, responseMessage.length, rinfo.port, rinfo.address);
 
         var responseSocket = dgram.createSocket("udp4");
         responseSocket.send(responseMessage, 0, responseMessage.length, rinfo.port, rinfo.address, function (err, bytes) {
