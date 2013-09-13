@@ -38,6 +38,16 @@ function convertStringToOID(oid) {
     return oid;
 }
 
+var snmpWalkToAsn1BerType = {
+    "INTEGER": "Integer",
+    "STRING": "OctetString",
+    "Hex-STRING": "OctetString",
+    "": "Null",
+    "OID": "ObjectIdentifier",
+    "Counter32" : "Counter",
+    "Gauge32": "Gauge",
+};
+
 
 function SnmpSocketListener(port, nosql) {
 
@@ -46,8 +56,6 @@ function SnmpSocketListener(port, nosql) {
     this.socket.bind(port);
 
     this.socket.on('message', this.messageRecieved.bind(this));
-
-    
 }
 
 SnmpSocketListener.prototype = new events.EventEmitter();
@@ -59,23 +67,53 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
 
     if (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU) {
-        nosqlFilter = "doc.oid > '" + oid + "'";
+        nosqlFilter = "doc.oid != null && doc.oid > '" + oid + "'";
     }
     else {
-        nosqlFilter = "doc.oid == '" + oid + "'";
+        nosqlFilter = "doc.oid != null && doc.oid == '" + oid + "'";
     }
 
 
     this.nosql.one(nosqlFilter, function (doc, offset) {
 
-        console.log(doc);
-
         var response = new snmp.Packet();
         response.pdu.type = asn1ber.pduTypes.GetResponsePDU;
         response.pdu.reqid = request.pdu.reqid;
-        response.pdu.varbinds[0].type = (doc.dataValue != null) ? asn1ber.types.OctetString: asn1ber.types.Null;
-        response.pdu.varbinds[0].oid = convertStringToOID(doc.oid);
-        response.pdu.varbinds[0].value = doc.dataValue;
+
+        console.log("Request for OID: " + request.pdu.varbinds[0].oid);
+
+        var type;
+        var oid;
+        var value;
+
+        if (doc != null){
+
+            
+            var docDataType = doc.dataType;
+            type = snmpWalkToAsn1BerType[docDataType];
+            if (docDataType == null || snmpWalkToAsn1BerType[docDataType] == null){
+                type = asn1ber.types.Null;
+            }
+            else {
+                type = asn1ber.types[snmpWalkToAsn1BerType[doc.dataType]] 
+            }
+
+            oid = convertStringToOID(doc.oid);
+
+            var value = doc.dataValue;
+            if (doc.dataType == "OID") {
+                value =  convertStringToOID(doc.dataValue);
+            }
+        }
+        else {
+            type = asn1ber.types.NoSuchObject;
+            oid = request.pdu.varbinds[0].oid;
+            value = "";
+        }
+
+        response.pdu.varbinds[0].type = type; 
+        response.pdu.varbinds[0].oid = oid;
+        response.pdu.varbinds[0].value = value;
 
         var responseMessage = snmp.encode(response);
 
