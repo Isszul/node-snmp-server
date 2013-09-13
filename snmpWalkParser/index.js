@@ -23,13 +23,14 @@ SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql)
 
             oidString = line[0];
 
-            value = line[1].split(": ");
+            if (line[1] != null ) {
+                value = line[1].split(": ");
+                dataTypeString = value[0];
+                dataValueString = value[1];
+                nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
+            }
 
-            dataTypeString = value[0];
-            dataValueString = value[1];
-
-
-            nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
+            
 
         });
 
