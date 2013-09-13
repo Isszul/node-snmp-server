@@ -65,9 +65,10 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
     var request = snmp.parse(msg);
     var oid = convertOIDToString(request.pdu.varbinds[0].oid);
 
-
-    if (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU) {
+    var getNext = false;;
+    if (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU || request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU2) {
         nosqlFilter = "doc.oid != null && doc.oid > '" + oid + "'";
+        getNext = true;
     }
     else {
         nosqlFilter = "doc.oid != null && doc.oid == '" + oid + "'";
@@ -80,14 +81,13 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
         response.pdu.type = asn1ber.pduTypes.GetResponsePDU;
         response.pdu.reqid = request.pdu.reqid;
 
-        console.log("Request for OID: " + request.pdu.varbinds[0].oid);
+        console.log(new Date() + ":" + (getNext ? "GetNext" : "Get") + "Request id:" + request.pdu.reqid + ", OID: " + request.pdu.varbinds[0].oid + ", IpAddress :" + rinfo.address);
 
         var type;
         var oid;
         var value;
 
         if (doc != null){
-
             
             var docDataType = doc.dataType;
             type = snmpWalkToAsn1BerType[docDataType];
