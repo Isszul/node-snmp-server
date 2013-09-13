@@ -91,8 +91,21 @@ function SnmpSocketListener(port, nosql) {
     this.nosql = nosql;
     this.socket = dgram.createSocket('udp4');
     this.socket.bind(port);
-
+    this.oidRequested;
     this.socket.on('message', this.messageRecieved.bind(this));
+}
+
+
+
+var filterGetOid = function(doc) {
+    return doc.oid == this.oidRequested;
+}
+
+var filterGetNextOid = function(doc) {
+    
+    //TODO: Update this so it works!
+
+    return doc.oid > this.oidRequested;
 }
 
 
@@ -103,18 +116,21 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
     var request = snmp.parse(msg);
     var oid = convertOIDToString(request.pdu.varbinds[0].oid);
 
+    this.oidRequested = oid;
+
     var getNext = false;;
     if (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU || request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU2) {
-        nosqlFilter = "doc.oid != null && doc.oid > '" + oid + "'";
+        nosqlFilter = filterGetNextOid.bind(this);
         getNext = true;
     }
     else {
-        nosqlFilter = "doc.oid != null && doc.oid == '" + oid + "'";
+        nosqlFilter = filterGetOid.bind(this);
     }
 
 
     this.nosql.one(nosqlFilter, function (doc, offset) {
 
+        console.log(doc);
         console.log(new Date() + ":" + (getNext ? "GetNext" : "Get") + "Request id:" + request.pdu.reqid + ", OID: " + request.pdu.varbinds[0].oid + ", IpAddress :" + rinfo.address);
 
         var type;
