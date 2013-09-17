@@ -1,48 +1,59 @@
 
 var fs = require('fs');
 var events = require('events');
-
+var util = require('../util');
+var asn1ber = require('../lib/asn1ber.js');
 
 function SnmpWalkFileProcessor() {
     
 }
 
-SnmpWalkFileProcessor.prototype = new events.EventEmitter();
 
-SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
+var handleFileRead = function (err, fileAsString) {
 
-    var self = this
+    if (err) throw err;
 
-    fs.readFile(filename, "utf8", function (err, fileAsString) {
+    fileAsString.split("\r\n").map(function (line) {
 
-        if (err) throw err;
+        line = line.split(" = ");
 
-        fileAsString.split("\r\n").map(function (line) {
+        oidString = util.convertStringToOID(line[0]);
 
-            line = line.split(" = ");
+        if (line[1] != null) {
+            value = line[1].split(": ");
+            dataTypeString = util.convertDataType(value[0]);
+            dataValueString = util.getParsedValueFromTypeAndValue(dataTypeString, value[1]);
 
-            oidString = line[0];
-
-            if (line[1] != null ) {
-                value = line[1].split(": ");
-                dataTypeString = value[0];
-                dataValueString = value[1];
-                nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
-            }
-
-            
-
-        });
-
-        nosql.on('insert', function () {
-            if (nosql.pendingWrite.length == 0) {
-                self.emit('fileprocessed');
-            }
-        });
+            Nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
+        }
 
     });
 
 };
+
+
+SnmpWalkFileProcessor.prototype = new events.EventEmitter();
+
+
+SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
+
+    self = this;
+
+    Nosql = nosql;
+
+    Nosql.on('insert', function () {
+        if (Nosql.pendingWrite.length == 0) {
+            self.emit('fileprocessed');
+        }
+    });
+
+    fs.readFile(filename, "utf8", handleFileRead);
+
+
+
+};
+
+
 
 
 
