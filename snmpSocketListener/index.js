@@ -82,7 +82,7 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
         else {
             type = asn1ber.types.NoSuchObject;
             oid = request.pdu.varbinds[0].oid;
-            value = "";
+            value = 'noSuchObject';
         }
         console.log("Response:" + type + ", OID: " + oid + ", value: " + value);
 
