@@ -8,12 +8,17 @@ function SnmpWalkFileProcessor() {
     
 }
 
+var linesToRead;
+var linesRead;
 
 var handleFileRead = function (err, fileAsString) {
 
     if (err) throw err;
 
-    fileAsString.split("\r\n").map(function (line) {
+    var fileLines = fileAsString.split("\r\n")
+    linesToRead = fileLines.length;
+
+    fileLines.map(function (line) {
 
         line = line.split(" = ");
 
@@ -25,6 +30,7 @@ var handleFileRead = function (err, fileAsString) {
             dataValueString = util.getParsedValueFromTypeAndValue(dataTypeString, value[1]);
 
             Nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
+            linesRead++;
         }
 
     });
@@ -42,11 +48,12 @@ SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql)
     Nosql = nosql;
 
     Nosql.on('insert', function () {
-        if (Nosql.pendingWrite.length == 0) {
+        if (Nosql.pendingWrite.length == 0 && linesRead == linesToRead) {
             self.emit('fileprocessed');
         }
     });
 
+    linesRead = 0;
     fs.readFile(filename, "utf8", handleFileRead);
 
 
