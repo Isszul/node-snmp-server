@@ -1,16 +1,29 @@
 var SNMP_PORT = 161;
 
 var snmpSocketListener = require('./snmpSocketListener');
-var nosql = require('nosql').load("./tmpDB.nosql");
+var nosql = require('nosql')
 var snmpWalkParser = require('./snmpWalkParser').init();
 
 
-nosql.clear();
+var eventEmitter = new events.EventEmitter();
 
-snmpWalkParser.processSnmpWalkFile("./example.snmpwalk", nosql);
+exports.init = function () {
+    nosql.load("./tmpDB.nosql");
 
-snmpWalkParser.on("fileprocessed", function () {
+    nosql.clear();
 
-    snmpSocketListener.init(SNMP_PORT, nosql);
+    return eventEmitter;
+};
 
-});
+exports.loadFile = function (filename) {
+
+    snmpWalkParser.processSnmpWalkFile(filename, nosql);
+
+    snmpWalkParser.on("fileprocessed", function () {
+
+        snmpSocketListener.init(SNMP_PORT, nosql);
+
+        eventEmitter.emit('listening');
+
+    });
+}
