@@ -1,6 +1,6 @@
 {
   "name": "node-snmp-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "0.0.1",
   "main": "index.js",
   "scripts": {
@@ -15,5 +15,9 @@
   "dependencies": {
     "nosql": "~1.0.3-3"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "readme": "node-snmp-server\r\n================\r\n",
+  "readmeFilename": "README.md",
+  "_id": "node-snmp-server@0.0.2",
+  "_from": "node-snmp-server"
 }
