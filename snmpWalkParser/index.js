@@ -44,8 +44,8 @@ SnmpWalkFileProcessor.prototype = new events.EventEmitter();
 SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
 
     self = this;
-
     Nosql = nosql;
+
 
     Nosql.on('insert', function () {
         if (Nosql.pendingWrite.length == 0 && linesRead == linesToRead) {

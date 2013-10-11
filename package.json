@@ -18,6 +18,6 @@
   "devDependencies": {},
   "readme": "node-snmp-server\r\n================\r\n",
   "readmeFilename": "README.md",
-  "_id": "node-snmp-server@0.0.2",
+  "_id": "node-snmp-server@0.0.5",
   "_from": "node-snmp-server"
 }

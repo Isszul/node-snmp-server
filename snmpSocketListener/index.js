@@ -51,14 +51,10 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
     this.oidRequested = oid;
 
-    var getNext = false; ;
-    if (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU || request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU2) {
-        nosqlFilter = filterGetNextOid.bind(this);
-        getNext = true;
-    }
-    else {
-        nosqlFilter = filterGetOid.bind(this);
-    }
+    var getNext = (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU || request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU2);
+
+    nosqlFilter = (getNext) ? filterGetNextOid.bind(this) : filterGetOid.bind(this);
+
 
     console.log((getNext ? "GetNext" : "Get") + "Request id:" + request.pdu.reqid + ", OID: " + request.pdu.varbinds[0].oid + ", IpAddress :" + rinfo.address);
 
