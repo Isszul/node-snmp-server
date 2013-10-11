@@ -3,7 +3,7 @@ var SNMP_PORT = 161;
 var snmpSocketListener = require('./snmpSocketListener');
 var nosql = require('nosql')
 var snmpWalkParser = require('./snmpWalkParser').init();
-
+var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
 
