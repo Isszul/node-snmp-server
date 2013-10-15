@@ -53,7 +53,7 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
     var getNext = (request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU || request.pdu.type == asn1ber.pduTypes.GetNextRequestPDU2);
 
-    nosqlFilter = (getNext) ? filterGetNextOid.bind(this) : filterGetOid.bind(this);
+    var nosqlFilter = (getNext) ? filterGetNextOid.bind(this) : filterGetOid.bind(this);
 
 
     console.log((getNext ? "GetNext" : "Get") + "Request id:" + request.pdu.reqid + ", OID: " + request.pdu.varbinds[0].oid + ", IpAddress :" + rinfo.address);
@@ -70,7 +70,7 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
         var oid;
         var value;
 
-        if (doc != null) {
+        if (doc !== null) {
             type = doc.dataType;
             oid = doc.oid;
             value = doc.dataValue;
@@ -90,7 +90,9 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
 
         var responseSocket = dgram.createSocket("udp4");
         responseSocket.send(responseMessage, 0, responseMessage.length, rinfo.port, rinfo.address, function (err, bytes) {
-            if (err) console.log(err);
+            if (err) {
+                console.log(err);
+            }
             responseSocket.close();
         });
     });
