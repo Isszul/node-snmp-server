@@ -7,6 +7,13 @@ var events = require('events');
 
 var events = new events.EventEmitter();
 
+exports.setSnmpPort = function (snmpPort) {
+    
+    SNMP_PORT = snmpPort;
+
+}
+    
+
 exports.loadFile = function (filename) {
 
     nosql.clear();
