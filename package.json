@@ -1,6 +1,6 @@
 {
   "name": "node-snmp-server",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "0.0.1",
   "main": "index.js",
   "scripts": {
