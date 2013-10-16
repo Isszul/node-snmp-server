@@ -9,6 +9,7 @@ function SnmpWalkFileProcessor() {
 
 var linesToRead;
 var linesRead;
+var Nosql;
 
 var handleFileRead = function (err, fileAsString) {
 
@@ -38,13 +39,15 @@ var handleFileRead = function (err, fileAsString) {
 };
 
 
+
+
 SnmpWalkFileProcessor.prototype = new events.EventEmitter();
 
 
 SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
 
     var self = this;
-    var Nosql = nosql;
+    Nosql = nosql;
 
 
     Nosql.on('insert', function () {
