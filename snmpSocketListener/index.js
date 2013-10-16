@@ -3,7 +3,6 @@ var events = require('events');
 var dgram = require('dgram');
 var asn1ber = require('../lib/asn1ber.js');
 var snmp = require('../lib/snmp.js');
-var util = require('../util');
 
 
 function buildPacket(request, type, oid, value) {
@@ -20,7 +19,7 @@ function buildPacket(request, type, oid, value) {
 
 
 function SnmpSocketListener(port, nosql) {
-    console.log("Socket Listener started on port : " + port)
+    console.log("Socket Listener started on port : " + port);
     this.nosql = nosql;
     this.socket = dgram.createSocket('udp4');
     this.socket.bind(port);
@@ -32,14 +31,14 @@ function SnmpSocketListener(port, nosql) {
 
 var filterGetOid = function(doc) {
     return doc.oid == this.oidRequested;
-}
+};
 
 var filterGetNextOid = function(doc) {
     
     //TODO: Update this so it works!
 
     return doc.oid > this.oidRequested;
-}
+};
 
 
 SnmpSocketListener.prototype = new events.EventEmitter();
