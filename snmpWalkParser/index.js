@@ -22,15 +22,16 @@ var handleFileRead = function (err, fileAsString) {
 
         line = line.split(" = ");
 
-        oidString = util.convertStringToOID(line[0]);
+        var oidString = util.convertStringToOID(line[0]);
 
-        if (line[1] != null) {
-            value = line[1].split(": ");
-            dataTypeString = util.convertDataType(value[0]);
-            dataValueString = util.getParsedValueFromTypeAndValue(dataTypeString, value[1]);
+        if (line[1] !== null) {
+            var value = line[1].split(": ");
+            var dataTypeString = util.convertDataType(value[0]);
+            var dataValueString = util.getParsedValueFromTypeAndValue(dataTypeString, value[1]);
 
             Nosql.insert({ oid: oidString, dataType: dataTypeString, dataValue: dataValueString });
-            linesRead++;
+            linesRead++; 
+            
         }
 
     });
@@ -43,12 +44,12 @@ SnmpWalkFileProcessor.prototype = new events.EventEmitter();
 
 SnmpWalkFileProcessor.prototype.processSnmpWalkFile = function (filename, nosql) {
 
-    self = this;
-    Nosql = nosql;
+    var self = this;
+    var Nosql = nosql;
 
 
     Nosql.on('insert', function () {
-        if (Nosql.pendingWrite.length == 0 && linesRead == linesToRead) {
+        if (Nosql.pendingWrite.length === 0 && linesRead == linesToRead) {
             self.emit('fileprocessed');
         }
     });
