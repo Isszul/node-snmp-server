@@ -17,11 +17,12 @@ var convertOIDToString = function(oid) {
     for (var i=0; i<oid.length; i++) {
         output = output + oid[i];
         if (i<oid.length-1) {
-            output = output + "."
+            output = output + ".";
         }
     }
     return output;
-}
+};
+
 exports.convertOIDToString = convertOIDToString;
 
 
@@ -43,21 +44,23 @@ var convertStringToOID = function(oid) {
         });
 
     return oid;
-}
+};
+
 exports.convertStringToOID = convertStringToOID;
 
 
 var convertDataType = function(dataType) {
 
     var type = snmpWalkToAsn1BerType[dataType];
-    if (dataType == null || snmpWalkToAsn1BerType[dataType] == null){
+    if (dataType === null || snmpWalkToAsn1BerType[dataType] === null){
         type = asn1ber.types.Null;
     }
     else {
-        type = asn1ber.types[snmpWalkToAsn1BerType[dataType]] 
+        type = asn1ber.types[snmpWalkToAsn1BerType[dataType]] ;
     }
     return type;         
-}
+};
+
 exports.convertDataType = convertDataType;
 
 
@@ -75,5 +78,6 @@ var getParsedValueFromTypeAndValue = function (type, value) {
 
 
     return returnValue;
-}
+};
+
 exports.getParsedValueFromTypeAndValue = getParsedValueFromTypeAndValue;

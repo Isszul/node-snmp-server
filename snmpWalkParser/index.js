@@ -2,7 +2,6 @@
 var fs = require('fs');
 var events = require('events');
 var util = require('../util');
-var asn1ber = require('../lib/asn1ber.js');
 
 function SnmpWalkFileProcessor() {
     
@@ -15,7 +14,7 @@ var handleFileRead = function (err, fileAsString) {
 
     if (err) throw err;
 
-    var fileLines = fileAsString.split("\r\n")
+    var fileLines = fileAsString.split("\r\n");
     linesToRead = fileLines.length;
 
     fileLines.map(function (line) {

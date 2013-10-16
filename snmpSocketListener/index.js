@@ -96,8 +96,8 @@ SnmpSocketListener.prototype.messageRecieved = function (msg, rinfo) {
             responseSocket.close();
         });
     });
-}
+};
 
 exports.init = function (port, nosql) {
     return new SnmpSocketListener(port, nosql);
-}
+};
