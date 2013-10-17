@@ -7,12 +7,6 @@ var events = require('events');
 
 var events = new events.EventEmitter();
 
-exports.setSnmpPort = function (snmpPort) {
-    
-    SNMP_PORT = snmpPort;
-
-}
-    
 
 exports.loadFile = function (filename) {
 
@@ -22,11 +16,21 @@ exports.loadFile = function (filename) {
 
     snmpWalkParser.on("fileprocessed", function () {
 
-        snmpSocketListener.init(SNMP_PORT, nosql);
-
-        events.emit('listening');
+        events.emit('fileprocessed');
 
     });
-}
+};
+
+exports.startListening = function (port) {
+    
+    snmpSocketListener.init((port !== null) ? port : SNMP_PORT, nosql);
+    
+    snmpSocketListener.on('listening', function () {
+       
+       events.emit('listening');
+        
+    });
+    
+};
 
 exports.events = events;

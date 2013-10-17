@@ -25,6 +25,8 @@ function SnmpSocketListener(port, nosql) {
     this.socket.bind(port);
     this.oidRequested;
     this.socket.on('message', this.messageRecieved.bind(this));
+    this.emit('listening');
+    
 }
 
 
